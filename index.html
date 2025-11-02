@@ -3,147 +3,371 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lemon Games</title>
+<title>Lemon Games - Eaglercraft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
-  /* Basic reset & dark theme */
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; font-family: 'Poppins', sans-serif; background: #121212; color: #fff; display: flex; flex-direction: column; }
+  html, body { 
+    height: 100%; 
+    font-family: 'Poppins', sans-serif; 
+    background: #0d0d0d; 
+    color: #fff; 
+    overflow: hidden;
+  }
   
+  /* Animated gradient header */
   header {
     text-align: center;
     padding: 20px 0;
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 700;
-    background: linear-gradient(270deg, #ff3c3c, #ffdd3c, #3cff88, #3cafff);
-    background-size: 800% 800%;
+    background: linear-gradient(270deg, #ff3c3c, #ffdd3c, #3cff88, #3cafff, #ff3c3c);
+    background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: gradient 20s ease infinite;
+    background-clip: text;
+    animation: gradient 8s ease infinite;
+    letter-spacing: 2px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 100;
   }
-
+  
   @keyframes gradient {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
-
-  #container {
-    flex: 1;
+  
+  /* Main container */
+  #gameContainer {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+  }
+  
+  #gameContainer.show {
+    display: block;
+  }
+  
+  /* Splash screen */
+  #splash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
+    background: #0d0d0d;
+    z-index: 50;
   }
-
-  iframe {
-    width: 85%;
-    height: 70%;
+  
+  #splash.hide {
+    display: none;
+  }
+  
+  .version-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .version-btn {
+    padding: 12px 24px;
+    background: rgba(255, 235, 59, 0.1);
+    border: 2px solid rgba(255, 235, 59, 0.3);
+    border-radius: 10px;
+    color: #ffeb3b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+  }
+  
+  .version-btn:hover {
+    background: rgba(255, 235, 59, 0.2);
+    border-color: #ffeb3b;
+    transform: translateY(-2px);
+  }
+  
+  .version-btn.active {
+    background: linear-gradient(135deg, #ffeb3b, #ffc107);
+    border-color: #ffeb3b;
+    color: #1a1a1a;
+  }
+  
+  .play-button {
+    padding: 20px 60px;
+    font-size: 1.3rem;
+    font-weight: 700;
     border: none;
     border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-    display: none;
-    background: #000;
+    cursor: pointer;
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d, #1a1a1a);
+    background-size: 200% 200%;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
   }
-
+  
+  .play-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  .play-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    background: linear-gradient(135deg, #252525, #3a3a3a, #252525);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  
+  .play-button:hover::before {
+    left: 100%;
+  }
+  
+  /* Loading */
   #loading {
-    position: absolute;
-    font-size: 1.3rem;
-    color: #aaa;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     display: none;
-  }
-
-  .play-button {
-    padding: 18px 50px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background: linear-gradient(135deg, #222, #555);
-    color: #fff;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-    transition: all 0.2s;
-    z-index: 2;
-  }
-  .play-button:hover { transform: scale(1.05); background: linear-gradient(135deg, #111, #444); }
-
-  .fullscreen-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 8px 15px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid #888;
-    border-radius: 8px;
-    color: #fff;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.2s;
-    z-index: 2;
-  }
-  .fullscreen-button:hover { background: rgba(255,255,255,0.3); }
-
-  footer {
     text-align: center;
-    padding: 12px;
-    background: rgba(255,255,255,0.05);
-    font-size: 0.9rem;
+  }
+  
+  #loading.show {
+    display: block;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 15px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #3cafff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .loading-text {
+    font-size: 1.2rem;
     color: #aaa;
+    font-weight: 600;
+  }
+  
+  /* Info box */
+  .info-box {
+    margin-top: 30px;
+    max-width: 600px;
+    background: rgba(60, 175, 255, 0.1);
+    border: 2px solid rgba(60, 175, 255, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+  }
+  
+  .info-title {
+    color: #3cafff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  
+  .info-box p {
+    color: #ddd;
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+    line-height: 1.6;
+  }
+  
+  /* Error */
+  .error {
+    display: none;
+    background: rgba(255, 60, 60, 0.1);
+    border: 2px solid rgba(255, 60, 60, 0.3);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 500px;
+    text-align: center;
+  }
+  
+  .error.show {
+    display: block;
+  }
+  
+  .error-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ff6b6b;
+    margin-bottom: 8px;
+  }
+  
+  .error-text {
+    color: #ffaaaa;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 768px) {
+    header { font-size: 1.8rem; padding: 16px 0; }
+    .play-button { padding: 16px 40px; font-size: 1.1rem; }
+    .info-box { max-width: 90%; }
   }
 </style>
 </head>
 <body>
 
-<header>Lemon Games</header>
+<header>🍋 Lemon Games</header>
 
-<div id="container">
-  <iframe id="gameFrame" allowfullscreen></iframe>
-  <div id="loading">Loading game...</div>
-  <button class="play-button" onclick="playGame(this)">Play Game</button>
-  <button class="fullscreen-button" onclick="fullscreenGame()">⛶</button>
+<div id="splash">
+  <div class="version-selector">
+    <button class="version-btn active" data-version="1" onclick="selectVersion(1)">Version 1 (Fast)</button>
+    <button class="version-btn" data-version="2" onclick="selectVersion(2)">Version 2 (Stable)</button>
+    <button class="version-btn" data-version="3" onclick="selectVersion(3)">Version 3 (Offline)</button>
+  </div>
+  
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Eaglercraft...</div>
+  </div>
+  
+  <div class="error" id="error">
+    <div class="error-title">⚠️ Failed to Load</div>
+    <div class="error-text">Could not load the game. Try a different version or check your connection.</div>
+  </div>
+  
+  <button class="play-button" id="playBtn" onclick="playGame()">▶ Play Game</button>
+  
+  <div class="info-box">
+    <div class="info-title">⚡ Performance Tips</div>
+    <p><strong>• Try different versions</strong> - Each loads from different sources</p>
+    <p>• <strong>Version 1:</strong> EaglercraftX - Fastest, newest</p>
+    <p>• <strong>Version 2:</strong> Original 1.8.8 - Most stable</p>
+    <p>• <strong>Version 3:</strong> Offline build - Most compatible</p>
+    <p>• Once loaded, use ESC → Options → Video Settings</p>
+    <p>• Set Render Distance to Tiny/Short for 60+ FPS</p>
+  </div>
 </div>
 
-<footer>© 2025 Lemon Games</footer>
+<div id="gameContainer"></div>
 
 <script>
-const FILE_URL = "https://cdn.jsdelivr.net/gh/PlanetDogeCodes/EagletcraftX@main/egcfixed.xml";
+const VERSIONS = {
+  1: 'https://eaglecraft.pages.dev/',
+  2: 'https://ubg100.github.io/eaglercraft.html',
+  3: 'https://cdn.jsdelivr.net/gh/radmanplays/eaglercraft-1.8@main/index.html'
+};
 
-async function fetchGame() {
-  const res = await fetch(FILE_URL);
-  return await res.text();
-}
+let selectedVersion = 1;
+const splash = document.getElementById('splash');
+const gameContainer = document.getElementById('gameContainer');
+const loading = document.getElementById('loading');
+const playBtn = document.getElementById('playBtn');
+const error = document.getElementById('error');
 
-async function playGame(button) {
-  const iframe = document.getElementById('gameFrame');
-  const loading = document.getElementById('loading');
+function selectVersion(version) {
+  selectedVersion = version;
   
-  button.style.display = 'none';
-  loading.style.display = 'block';
-
-  try {
-    const gameHTML = await fetchGame();
-    iframe.contentDocument.open();
-    iframe.contentDocument.write(gameHTML);
-    iframe.contentDocument.close();
-    iframe.style.display = 'block';
-  } catch (e) {
-    alert('Failed to load the game.');
-    console.error(e);
-    button.style.display = 'block';
-  } finally {
-    loading.style.display = 'none';
+  document.querySelectorAll('.version-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Reset if game already loaded
+  if (gameContainer.classList.contains('show')) {
+    gameContainer.innerHTML = '';
+    gameContainer.classList.remove('show');
+    splash.classList.remove('hide');
   }
 }
 
-function fullscreenGame() {
-  const iframe = document.getElementById('gameFrame');
-  if (iframe.requestFullscreen) iframe.requestFullscreen();
-  else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
-  else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
+async function playGame() {
+  playBtn.style.display = 'none';
+  loading.classList.add('show');
+  error.classList.remove('show');
+  
+  try {
+    const url = VERSIONS[selectedVersion];
+    
+    // Create iframe for embedding (better than fetching HTML)
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('allow', 'fullscreen; autoplay; clipboard-read; clipboard-write; pointer-lock');
+    
+    gameContainer.innerHTML = '';
+    gameContainer.appendChild(iframe);
+    
+    // Wait for load
+    iframe.onload = () => {
+      loading.classList.remove('show');
+      splash.classList.add('hide');
+      gameContainer.classList.add('show');
+      
+      // Try to focus iframe
+      setTimeout(() => {
+        iframe.focus();
+        try {
+          iframe.contentWindow.focus();
+        } catch (e) {
+          console.log('Cannot focus iframe content');
+        }
+      }, 500);
+    };
+    
+    // Timeout fallback
+    setTimeout(() => {
+      if (loading.classList.contains('show')) {
+        loading.classList.remove('show');
+        splash.classList.add('hide');
+        gameContainer.classList.add('show');
+      }
+    }, 5000);
+    
+  } catch (e) {
+    console.error('Failed to load:', e);
+    loading.classList.remove('show');
+    error.classList.add('show');
+    playBtn.style.display = 'block';
+  }
 }
+
+// Click anywhere in game container to focus
+document.addEventListener('click', (e) => {
+  if (gameContainer.classList.contains('show')) {
+    const iframe = gameContainer.querySelector('iframe');
+    if (iframe) {
+      iframe.focus();
+      try {
+        iframe.contentWindow.focus();
+      } catch (e) {}
+    }
+  }
+});
 </script>
 
 </body>
