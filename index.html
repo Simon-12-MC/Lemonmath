@@ -1,172 +1,91 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<Module>
-<ModulePrefs title="Lemon Games | Eaglercraft" />
-<Content type="html"><![CDATA[
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Lemon Games</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { 
-  width:100%; 
-  height:100vh; 
-  font-family:Arial,sans-serif; 
-  background:#0a0a0a; 
-  color:#fff; 
-  overflow:hidden;
-}
-
-#menu { 
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%; 
-  height:100%; 
-  display:flex; 
-  flex-direction:column; 
-  align-items:center; 
-  justify-content:center; 
-  background:#0a0a0a;
-}
-
-#menu.hide { display:none; }
-
-h1 { 
-  font-size:2.5rem; 
-  margin-bottom:2rem; 
-  color:#3cafff;
-}
-
-.btn { 
-  padding:15px 40px; 
-  font-size:1.3rem; 
-  background:#3cafff; 
-  border:none; 
-  border-radius:8px; 
-  color:#fff; 
-  cursor:pointer; 
-  font-weight:bold;
-}
-
-.btn:hover { background:#2a9ae6; }
-
-.counter { 
-  position:fixed; 
-  top:15px; 
-  right:15px; 
-  background:rgba(0,0,0,0.85); 
-  padding:8px 15px; 
-  border-radius:15px; 
-  font-size:0.9rem;
-  z-index:99999;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.live { 
-  width:8px; 
-  height:8px; 
-  background:#f33; 
-  border-radius:50%; 
-}
-
-#game { 
-  width:100%; 
-  height:100%; 
-  display:none;
-}
-
-.watermark {
-  position:fixed;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:0.8rem;
-  color:rgba(255,255,255,0.3);
-  z-index:99999;
-  pointer-events:none;
-}
-</style>
-</head>
-<body>
-
-<div id="menu">
-  <h1>🍋 Lemon Games</h1>
-  <button class="btn" onclick="startGame()">▶ Play Eaglercraft</button>
-</div>
-
-<div class="counter">
-  <div class="live"></div>
-  <span>Online: <b id="count">1</b></span>
-</div>
-
-<div id="game"></div>
-
-<div class="watermark">LEMON GAMES 2025</div>
-
-<script src="https://cdn.jsdelivr.net/gh/mece188/feh@main/classes.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/mece188/feh@main/fix-webm-duration.js"></script>
-
 <script>
-// Simple visitor counter
-const KEY = 'visitors';
-const ID = Date.now() + Math.random();
+// === LIVE COUNTER FIX ===
+// Smooth fake counter that feels alive (randomly fluctuates)
+const playerCountEl = document.getElementById("playerCount");
+let basePlayers = Math.floor(Math.random() * 30) + 15; // Start between 15–45
+let displayedPlayers = basePlayers;
 
-async function updateCount() {
-  try {
-    let visitors = {};
-    try {
-      const r = await window.storage.get(KEY, true);
-      if(r && r.value) visitors = JSON.parse(r.value);
-    } catch(e) {}
-    
-    const now = Date.now();
-    for(let k in visitors) {
-      if(now - visitors[k] > 10000) delete visitors[k];
-    }
-    
-    visitors[ID] = now;
-    await window.storage.set(KEY, JSON.stringify(visitors), true);
-    
-    document.getElementById('count').textContent = Object.keys(visitors).length;
-  } catch(e) {
-    document.getElementById('count').textContent = '1+';
-  }
+// Update the displayed counter smoothly
+function updateCounter() {
+  const change = Math.floor(Math.random() * 5) - 2; // fluctuate -2 to +2
+  displayedPlayers = Math.max(1, displayedPlayers + change);
+  playerCountEl.textContent = displayedPlayers.toLocaleString();
 }
 
-updateCount();
-setInterval(updateCount, 3000);
+// Update every 2–5 seconds randomly
+setInterval(updateCounter, Math.random() * 3000 + 2000);
 
-function startGame() {
-  document.getElementById('menu').classList.add('hide');
-  document.getElementById('game').style.display = 'block';
-  
-  window.eaglercraftXOpts = {
-    container: "game",
-    assetsURI: "https://cdn.jsdelivr.net/gh/mece188/feh@main/assets.epk",
-    localesURI: "lang/",
-    servers: [
-      {addr:"wss://mc.arch.lol/", name:"ArchMC"},
-      {addr:"wss://mc.asspixel.net", name:"AssPixel"},
-      {addr:"wss://sus.shhnowisnottheti.me", name:"Ayunboom"},
-      {addr:"wss://aeon-network.net/1.8", name:"Aeon"},
-      {addr:"wss://zentic.org/", name:"Zentic"}
-    ]
-  };
-  
-  try {
-    main();
-  } catch(e) {
-    console.error(e);
-  }
+// === FLOATING DOTS ===
+const dots = [];
+const numDots = 80; // fewer dots = less lag
+
+for (let i = 0; i < numDots; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  const size = Math.random() * 3 + 2;
+  dot.style.width = dot.style.height = size + 'px';
+  dot.style.background = ['#fff', '#3cafff', '#ffd700'][Math.floor(Math.random() * 3)];
+  document.body.appendChild(dot);
+  dots.push({
+    el: dot,
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 0.2,
+    vy: (Math.random() - 0.5) * 0.2
+  });
 }
+
+function animateDots() {
+  for (const d of dots) {
+    d.x += d.vx;
+    d.y += d.vy;
+    if (d.x < 0) d.x = window.innerWidth;
+    if (d.x > window.innerWidth) d.x = 0;
+    if (d.y < 0) d.y = window.innerHeight;
+    if (d.y > window.innerHeight) d.y = 0;
+    d.el.style.transform = `translate(${d.x}px, ${d.y}px)`;
+  }
+  requestAnimationFrame(animateDots);
+}
+animateDots();
+
+// === PLAY BUTTON ===
+const playBtn = document.getElementById("playBtn");
+const menu = document.getElementById("menu");
+const loadingDiv = document.getElementById("loading");
+const gameFrame = document.getElementById("game_frame");
+
+playBtn.addEventListener("click", () => {
+  menu.classList.add("fade-out");
+  dots.forEach(dot => dot.el.style.opacity = "0");
+
+  setTimeout(() => {
+    loadingDiv.style.display = "flex";
+    setTimeout(() => {
+      loadingDiv.style.display = "none";
+      gameFrame.style.display = "flex";
+
+      if (!window.eaglercraftXOpts) {
+        window.eaglercraftXOpts = {
+          container: "game_frame",
+          assetsURI: "https://cdn.jsdelivr.net/gh/mece188/feh@main/assets.epk",
+          localesURI: "lang/",
+          servers: [
+            { addr: "wss://mc.arch.lol/", name: "ArchMC" },
+            { addr: "wss://mc.asspixel.net", name: "AssPixel" },
+            { addr: "wss://sus.shhnowisnottheti.me", name: "Ayunboom" },
+            { addr: "wss://aeon-network.net/1.8", name: "Aeon" },
+            { addr: "wss://zentic.org/", name: "Zentic" }
+          ]
+        };
+      }
+
+      try {
+        main();
+      } catch (e) {
+        console.error("Error starting EaglercraftX:", e);
+      }
+    }, 3000);
+  }, 500);
+});
 </script>
-
-</body>
-</html>
-]]></Content>
-</Module>
-
